@@ -11,11 +11,8 @@ import dataclasses as dcl
 import typing
 from typing import Tuple, List, Dict, Type
 
-from VideoLoader import *
 from FrameClassifier import *
-from CVUtil import *
-from VideoSearcher import *
-
+import aoirint_cv2videotools as cv2tools
 
 def dataclass_from_dict(cls: Type[dcl.dataclass], data_dict: Dict):
     class_dict = dict()
@@ -47,16 +44,16 @@ def get_loader(options):
     loader = None
 
     if options.video_url:
-        loader = YouTubeLoader(options.video_url)
+        loader = cv2tools.YouTubeLoader(options.video_url)
 
     elif options.video_file:
-        loader = FileLoader(options.video_file)
+        loader = cv2tools.FileLoader(options.video_file)
 
     elif options.live_channel_id:
         if not options.youtube_api_key:
             raise Exception('YouTube API Key is Required')
 
-        live_videos = YouTubeLiveVideoSearcher.search_live_videos(
+        live_videos = cv2tools.YouTubeLiveVideoSearcher.search_live_videos(
             api_key=options.youtube_api_key,
             channel_id=options.live_channel_id
         )
@@ -73,14 +70,14 @@ def get_loader(options):
 if __name__ == '__main__':
     import argparse
     p = argparse.ArgumentParser()
-    p.add_argument('-c', '--config', type=str, required=True)
+    p.add_argument('-c', '--config', type=str)
     options, _ = p.parse_known_args()
-    config_path = Path(options.config)
+    config_path = Path(options.config if options.config else __file__)
     config_dir = config_path.parent
 
     import configargparse
     p = configargparse.ArgumentParser(config_file_parser_class=configargparse.YAMLConfigFileParser)
-    p.add('-c', '--config', env_var='CONFIG_FILE', required=True, is_config_file=True)
+    p.add('-c', '--config', env_var='CONFIG_FILE', is_config_file=True)
 
     p.add('-u', '--video_url', type=str, env_var='VIDEO_URL')
     p.add('-f', '--video_file', type=str, env_var='VIDEO_FILE')
@@ -102,7 +99,7 @@ if __name__ == '__main__':
 
     fourcc = cv2.VideoWriter_fourcc(*'VP80')
     consumer = cv2.VideoWriter(
-        filename='output.mkv',
+        filename=f'{int(time.time())}.mkv',
         fourcc=fourcc,
         fps=int(loader.framerate),
         frameSize=frame_size,
@@ -134,7 +131,7 @@ if __name__ == '__main__':
             text += f', {fclass.label}'
             text += f': {res.value})'
 
-        frame = cvPutText(
+        frame = cv2tools.util.cvPutText(
             img=frame,
             text=text,
             org=(8, 8),

@@ -6,3 +6,4 @@ google-api-python-client >= 1.12.1
 python-dateutil >= 2.8.1
 configargparse >= 1.2.3
 PyYAML >= 5.3.1
+aoirint-cv2videotools >= 0.0.1b7
