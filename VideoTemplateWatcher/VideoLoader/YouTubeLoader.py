@@ -5,11 +5,13 @@ import cv2
 from .VideoLoader import VideoLoader
 
 class YouTubeLoader(VideoLoader):
-    def __init__(self, video_url=None, video_id=None):
+    def __init__(self,
+        video_url=None,
+        video_id=None,
+        video_format='bestvideo/best',
+        # video_format='worstvideo/worst',
+    ):
         assert video_url or video_id
-
-        # video_format = 'worstvideo/worst'
-        video_format = 'bestvideo/best'
 
         if video_id is not None:
             params = {
